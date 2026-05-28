@@ -1,0 +1,48 @@
+---
+description: Admin dashboard UI style (Fily-inspired) for acfe_shop frontends
+globs: "**/*.{tsx,jsx,vue,css,scss,html},**/templates/**"
+alwaysApply: false
+---
+
+# ACFE Shop — Dashboard UI Style
+
+Reference: light admin dashboard (Fily-style). Apply to all staff-facing UI (memos, inventory, waste, sales).
+
+## Layout
+
+- Page background: light gray (`#f4f7f6` or `gray-50`).
+- Content in **white cards**: rounded (`rounded-lg`, ~8px), subtle shadow (`shadow-sm`), generous padding (`p-4`–`p-6`).
+- **Top bar**: logo/app name left, search center or wide, utilities right (notifications, profile dropdown).
+- **Secondary nav**: horizontal tabs/links with small line icons below the header.
+- Grid: KPI row → summary badges → 2–3 column mid section → full-width data table.
+
+## Color & status
+
+| Role | Use | Example |
+|------|-----|---------|
+| Success / growth | KPI up, “Progress” | emerald/green |
+| Info / primary action | Import, Update, links | blue (`#3b82f6` range) |
+| Warning / pending | “Open”, alerts | amber/orange |
+| Danger / on hold | errors, blocked | soft red/rose |
+
+Status in tables: **pill badges** (rounded-full, small text), not plain text.
+
+## Typography & density
+
+- Sans-serif system stack (Inter, system-ui).
+- Hierarchy: bold large numbers on KPIs; `text-sm text-gray-500` for labels and secondary copy.
+- Breathable spacing between cards (`gap-4`–`gap-6`); avoid cramped tables.
+
+## Components to reuse
+
+- **KPI cards**: metric + % change + mini sparkline or donut.
+- **Summary badges**: colored rounded blocks (icon + amount + “This month”).
+- **Charts**: line (trends), bar (monthly), donut (distribution)—muted grid, clear legend.
+- **Tables**: alternating row tint, avatar initials in circles, right-aligned actions.
+- **Buttons**: primary = solid blue; secondary = outline or text-only (“View more”).
+
+## Data viz for acfe_shop
+
+Map modules to this pattern: sales → revenue KPIs + charts; inventory → stock levels + low-par alerts; waste → cost % + trend; memos → feed/timeline instead of generic tickets.
+
+Do **not** default to dark mode or heavy gradients unless the user asks.
