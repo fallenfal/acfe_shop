@@ -61,11 +61,13 @@ Optional (usually auto-set by Railway):
 
 ## 4. Deploy
 
-Railway reads `railway.toml` (uses the **RAILPACK** builder so both Python and Node are installed):
+Railway reads `railway.toml` and builds with the **Dockerfile** (Node 20 builds the frontend, Python 3.12 runs Django):
 
-- **Build**: Railpack installs `requirements.txt` + `package.json`, then `npm run build` and `collectstatic`
+- **Build**: `docker build` — `npm ci` / `npm run build` in `frontend/`, then `pip install`, `collectstatic`
 - **Pre-deploy**: `migrate` + `bootstrap_demo` (superuser + demo data if missing)
 - **Start**: Gunicorn on `$PORT`
+
+If you see `npm: not found` with Railpack-only builds, use this Dockerfile setup (already in the repo).
 
 After deploy, open the generated URL (e.g. `https://acfe-shop-production.up.railway.app`).
 

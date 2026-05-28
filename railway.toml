@@ -1,10 +1,9 @@
-# Railway deployment — single service: Django API + built React frontend
-# Docs: https://docs.railway.com/config-as-code/reference
+# Railway — Docker build (Node + Python). See DEPLOY_RAILWAY.md
+# Railway uses the Dockerfile when present; Railpack buildCommand is not used.
 
 [build]
-builder = "RAILPACK"
-# Railpack installs Python (requirements.txt) and Node (package.json) before this runs
-buildCommand = "npm run build && python manage.py collectstatic --noinput"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 preDeployCommand = "python manage.py migrate && python manage.py bootstrap_demo"

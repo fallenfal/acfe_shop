@@ -1,7 +1,7 @@
 {
   "name": "acfe-shop",
   "private": true,
-  "description": "Root scripts for Railway/Nixpacks (frontend lives in frontend/)",
+  "description": "Optional local build helper (production uses Dockerfile on Railway)",
   "scripts": {
     "build": "npm ci --prefix frontend && npm run build --prefix frontend"
   }
