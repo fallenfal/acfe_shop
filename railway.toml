@@ -7,7 +7,7 @@ builder = "RAILPACK"
 buildCommand = "npm run build && python manage.py collectstatic --noinput"
 
 [deploy]
-preDeployCommand = ["/bin/sh", "-c", "python manage.py migrate && python manage.py bootstrap_demo"]
+preDeployCommand = "python manage.py migrate && python manage.py bootstrap_demo"
 startCommand = "gunicorn acfe_shop.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
 healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"
