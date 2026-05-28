@@ -26,6 +26,8 @@ COPY --from=frontend /app/frontend/dist /app/frontend/dist
 
 RUN python manage.py collectstatic --noinput
 
+RUN chmod +x /app/bin/start.sh
+
 EXPOSE 8000
 
-CMD sh -c "gunicorn acfe_shop.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"
+CMD ["/app/bin/start.sh"]

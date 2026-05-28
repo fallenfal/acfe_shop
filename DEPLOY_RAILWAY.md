@@ -65,7 +65,8 @@ Railway reads `railway.toml` and builds with the **Dockerfile** (Node 20 builds 
 
 - **Build**: `docker build` — `npm ci` / `npm run build` in `frontend/`, then `pip install`, `collectstatic`
 - **Pre-deploy**: `migrate` + `bootstrap_demo` (superuser + demo data if missing)
-- **Start**: Dockerfile `CMD` (shell form so `${PORT}` expands) — do **not** set `startCommand` in `railway.toml` for Docker builds
+- **Start**: `bin/start.sh` via Dockerfile `CMD` — reads `$PORT` in a shell script
+- **Important**: In Railway → web service → **Settings** → **Deploy**, clear **Custom Start Command** if it contains `$PORT` (that overrides the Dockerfile and breaks startup)
 
 If you see `npm: not found` with Railpack-only builds, use this Dockerfile setup (already in the repo).
 
@@ -119,6 +120,7 @@ Uploaded files (memo attachments, training images) use `media/` on disk. Railway
 | 400 / DisallowedHost | Set `ALLOWED_HOSTS=.railway.app` or your exact domain |
 | No demo users | Check release logs for `bootstrap_demo`; ensure `SEED_DEMO_DATA=true` |
 | DB connection error | Ensure `DATABASE_URL` references Postgres |
+| `'$PORT' is not a valid port number` | Remove **Custom Start Command** in Railway service settings; redeploy so Dockerfile `bin/start.sh` runs |
 
 Local production-like test:
 
