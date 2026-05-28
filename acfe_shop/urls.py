@@ -29,7 +29,7 @@ def serve_frontend_asset(request, path: str):
     if dist is None:
         raise Http404("Frontend not built")
     file_path = (dist / "assets" / path).resolve()
-    if not str(file_path).startswith(str((dist / "assets").resolve()):
+    if not str(file_path).startswith(str((dist / "assets").resolve())):
         raise Http404()
     if not file_path.is_file():
         raise Http404()
