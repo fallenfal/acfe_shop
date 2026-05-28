@@ -4,6 +4,10 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.egg-info/
+.eggs/
+dist/
+build/
 .venv/
 venv/
 ENV/
@@ -15,11 +19,33 @@ db.sqlite3
 media/
 staticfiles/
 
-# Environment
+# Environment & secrets
 .env
+.env.local
+.env.*.local
 
-# IDE
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Testing & coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# IDE & OS
 .idea/
 .vscode/
+.cursor/
 *.swp
+*~
 .DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Railway / local tooling
+.railway/

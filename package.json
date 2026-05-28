@@ -1,0 +1,8 @@
+{
+  "name": "acfe-shop",
+  "private": true,
+  "description": "Root scripts for Railway/Nixpacks (frontend lives in frontend/)",
+  "scripts": {
+    "build": "npm ci --prefix frontend && npm run build --prefix frontend"
+  }
+}

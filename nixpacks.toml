@@ -1,0 +1,3 @@
+# Node.js for Vite build (Python is detected from requirements.txt)
+[phases.setup]
+nixPkgs = ["nodejs_20"]
