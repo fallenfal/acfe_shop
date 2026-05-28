@@ -1,1 +1,2 @@
-web: gunicorn acfe_shop.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+# Startup is defined in Dockerfile CMD (Railway Docker builds).
+# Do not add a web: line with $PORT here — exec form won't expand it.

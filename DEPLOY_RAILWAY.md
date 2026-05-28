@@ -65,7 +65,7 @@ Railway reads `railway.toml` and builds with the **Dockerfile** (Node 20 builds 
 
 - **Build**: `docker build` — `npm ci` / `npm run build` in `frontend/`, then `pip install`, `collectstatic`
 - **Pre-deploy**: `migrate` + `bootstrap_demo` (superuser + demo data if missing)
-- **Start**: Gunicorn on `$PORT`
+- **Start**: Dockerfile `CMD` (shell form so `${PORT}` expands) — do **not** set `startCommand` in `railway.toml` for Docker builds
 
 If you see `npm: not found` with Railpack-only builds, use this Dockerfile setup (already in the repo).
 

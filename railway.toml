@@ -7,6 +7,6 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 preDeployCommand = "python manage.py migrate && python manage.py bootstrap_demo"
-startCommand = "gunicorn acfe_shop.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+# No startCommand — Dockerfile CMD uses sh -c so ${PORT} expands correctly
 healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"
