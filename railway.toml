@@ -1,12 +1,13 @@
 # Railway deployment — single service: Django API + built React frontend
-# Docs: https://docs.railway.com/reference/config-as-code
+# Docs: https://docs.railway.com/config-as-code/reference
 
 [build]
-builder = "NIXPACKS"
-buildCommand = "pip install -r requirements.txt && npm run build && python manage.py collectstatic --noinput"
+builder = "RAILPACK"
+# Railpack installs Python (requirements.txt) and Node (package.json) before this runs
+buildCommand = "npm run build && python manage.py collectstatic --noinput"
 
 [deploy]
-releaseCommand = "python manage.py migrate && python manage.py bootstrap_demo"
+preDeployCommand = ["/bin/sh", "-c", "python manage.py migrate && python manage.py bootstrap_demo"]
 startCommand = "gunicorn acfe_shop.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
 healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"

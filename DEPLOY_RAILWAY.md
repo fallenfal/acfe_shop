@@ -61,10 +61,10 @@ Optional (usually auto-set by Railway):
 
 ## 4. Deploy
 
-Railway reads `railway.toml`:
+Railway reads `railway.toml` (uses the **RAILPACK** builder so both Python and Node are installed):
 
-- **Build**: install Python deps, `npm ci` + `npm run build` in `frontend/`, `collectstatic`
-- **Release**: `migrate` + `bootstrap_demo` (superuser + demo data if missing)
+- **Build**: Railpack installs `requirements.txt` + `package.json`, then `npm run build` and `collectstatic`
+- **Pre-deploy**: `migrate` + `bootstrap_demo` (superuser + demo data if missing)
 - **Start**: Gunicorn on `$PORT`
 
 After deploy, open the generated URL (e.g. `https://acfe-shop-production.up.railway.app`).
