@@ -7,6 +7,7 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 preDeployCommand = "python manage.py migrate && python manage.py bootstrap_demo"
-# No startCommand — Dockerfile CMD uses sh -c so ${PORT} expands correctly
+# Overrides dashboard "gunicorn ... $PORT" — script expands PORT in a shell (no $PORT in this string)
+startCommand = "/app/bin/start.sh"
 healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"

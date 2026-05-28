@@ -59,14 +59,27 @@ Optional (usually auto-set by Railway):
 
 ---
 
-## 4. Deploy
+## 4. Clear the dashboard start command (if Gunicorn shows `$PORT` errors)
+
+Railway’s UI can store a start command that **overrides** the Dockerfile. If you see `'$PORT' is not a valid port number`:
+
+1. Open your project → click the **web app** service (not Postgres).
+2. Go to **Settings**.
+3. Find **Deploy** → **Custom Start Command** (sometimes **Start Command** under “Deploy” or “Service”).
+4. **Delete** the entire command (leave the field **empty**). Do not use `gunicorn ... $PORT ...`.
+5. Click **Save** / **Update**.
+6. Push the latest `railway.toml` (it sets `startCommand = "/app/bin/start.sh"`, which is safe) and **Redeploy**.
+
+After a successful deploy, **Deploy Logs** should show Gunicorn listening on a numeric port (e.g. `8080`), not `$PORT`.
+
+## 5. Deploy
 
 Railway reads `railway.toml` and builds with the **Dockerfile** (Node 20 builds the frontend, Python 3.12 runs Django):
 
 - **Build**: `docker build` — `npm ci` / `npm run build` in `frontend/`, then `pip install`, `collectstatic`
 - **Pre-deploy**: `migrate` + `bootstrap_demo` (superuser + demo data if missing)
-- **Start**: `bin/start.sh` via Dockerfile `CMD` — reads `$PORT` in a shell script
-- **Important**: In Railway → web service → **Settings** → **Deploy**, clear **Custom Start Command** if it contains `$PORT` (that overrides the Dockerfile and breaks startup)
+- **Start**: `/app/bin/start.sh` (set in `railway.toml` and Dockerfile) — expands `PORT` inside the script
+- If deploy still shows `$PORT` errors, clear the dashboard start command (steps below); `railway.toml` should override it after you push
 
 If you see `npm: not found` with Railpack-only builds, use this Dockerfile setup (already in the repo).
 
@@ -88,7 +101,7 @@ Django admin: **`admin`** / your `DJANGO_SUPERUSER_PASSWORD`.
 
 ---
 
-## 5. Keeping demo data on redeploy
+## 6. Keeping demo data on redeploy
 
 `bootstrap_demo` is **idempotent**:
 
@@ -106,13 +119,13 @@ Or set `SEED_DEMO_DATA=false` to never seed (empty DB after migrate).
 
 ---
 
-## 6. Media uploads (optional)
+## 7. Media uploads (optional)
 
 Uploaded files (memo attachments, training images) use `media/` on disk. Railway disks are **ephemeral** unless you add a [Volume](https://docs.railway.com/reference/volumes) mounted at `/app/media` (or set `MEDIA_ROOT` accordingly). Demo seed data works without uploads.
 
 ---
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
