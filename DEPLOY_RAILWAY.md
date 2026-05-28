@@ -135,6 +135,7 @@ Uploaded files (memo attachments, training images) use `media/` on disk. Railway
 | DB connection error | Ensure `DATABASE_URL` references Postgres |
 | `'$PORT' is not a valid port number` | Remove **Custom Start Command** in Railway service settings; redeploy so Dockerfile `bin/start.sh` runs |
 | Healthcheck 400 / deploy timeout | Fixed in settings: `healthcheck.railway.app` is in `ALLOWED_HOSTS` |
+| “No active account found with the given credentials” | App login uses **email**, not username. Ensure `SEED_DEMO_DATA=true`, redeploy, or run `python manage.py bootstrap_demo` in Railway shell. Demo password: `acfe2024!` |
 
 Local production-like test:
 

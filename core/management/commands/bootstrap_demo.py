@@ -14,8 +14,9 @@ import os
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
+from core.demo_accounts import DEFAULT_DEMO_PASSWORD, sync_demo_passwords
 from core.management.superuser import ensure_dev_superuser
-from core.models import Organisation
+from core.models import Organisation, User
 from training.models import TrainingProgramme
 
 
@@ -58,5 +59,33 @@ class Command(BaseCommand):
             call_command("seed_training", force=force)
         else:
             self.stdout.write("Training data already exists — skipping seed_training.")
+
+        status, count = sync_demo_passwords()
+        if status == "no_org":
+            self.stdout.write(
+                self.style.WARNING(
+                    "No acfe-coffee organisation — demo app logins will not work. "
+                    "Check SEED_DEMO_DATA and pre-deploy logs."
+                )
+            )
+        elif status == "no_users":
+            self.stdout.write(
+                self.style.WARNING(
+                    "Organisation exists but demo users are missing — re-running seed_data --force."
+                )
+            )
+            call_command("seed_data", force=True)
+            call_command("seed_training", force=True)
+            status, count = sync_demo_passwords()
+        if status == "ok":
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Demo app logins use email + password {DEFAULT_DEMO_PASSWORD!r} "
+                    f"({count} accounts synced)."
+                )
+            )
+
+        user_count = User.objects.filter(organisation__slug="acfe-coffee").count()
+        self.stdout.write(f"Organisation users in database: {user_count}")
 
         self.stdout.write(self.style.SUCCESS("Bootstrap complete."))
