@@ -41,7 +41,7 @@ Set these on the **web service** (not the database):
 |----------|---------|--------|
 | `SECRET_KEY` | long random string | [Django secret key](https://docs.djangoproject.com/en/5.0/ref/settings/#secret-key) |
 | `DEBUG` | `False` | Production |
-| `ALLOWED_HOSTS` | `.railway.app` | Leading dot allows all Railway subdomains |
+| `ALLOWED_HOSTS` | `.railway.app` | Leading dot allows all Railway subdomains (`healthcheck.railway.app` is added automatically in settings) |
 | `DATABASE_URL` | *(from Postgres)* | Reference the plugin variable |
 | `SEED_DEMO_DATA` | `true` | Loads demo org, users, sales, training, etc. |
 | `DJANGO_SUPERUSER_PASSWORD` | strong password | Admin login — change from default |
@@ -134,6 +134,7 @@ Uploaded files (memo attachments, training images) use `media/` on disk. Railway
 | No demo users | Check release logs for `bootstrap_demo`; ensure `SEED_DEMO_DATA=true` |
 | DB connection error | Ensure `DATABASE_URL` references Postgres |
 | `'$PORT' is not a valid port number` | Remove **Custom Start Command** in Railway service settings; redeploy so Dockerfile `bin/start.sh` runs |
+| Healthcheck 400 / deploy timeout | Fixed in settings: `healthcheck.railway.app` is in `ALLOWED_HOSTS` |
 
 Local production-like test:
 
