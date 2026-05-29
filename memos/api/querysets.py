@@ -8,8 +8,13 @@ def filter_memos_for_user_role(queryset, role_slug):
     """
     Memos visible to a role: empty target_roles (all staff) or role slug in the list.
     PostgreSQL supports JSON contains; SQLite uses a quoted substring match.
+
+    Owners and content managers see every memo at the location (including drafts they
+    targeted at staff only).
     """
     if not role_slug:
+        return queryset
+    if role_slug in ("owner", "content_manager"):
         return queryset
 
     if connection.vendor == "postgresql":

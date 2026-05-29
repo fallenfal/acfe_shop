@@ -7,6 +7,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { ApiError } from "../../api/client";
 import {
   acknowledgeMemo,
   addMemoComment,
@@ -43,8 +44,14 @@ export function MemoDetail() {
     try {
       const data = await fetchMemo(locationId, id);
       setMemo(data);
-    } catch {
-      setError("Memo not found.");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.status === 404
+          ? "Memo not found. Try switching to the location where it was posted."
+          : err instanceof ApiError
+            ? err.message
+            : "Could not load memo.",
+      );
     } finally {
       setLoading(false);
     }

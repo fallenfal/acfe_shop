@@ -5,7 +5,7 @@ import { ApiError } from "../../api/client";
 import { createMemo, fetchMemo, updateMemo } from "../../api/memos";
 import { MarkdownEditor } from "../../components/memos/MarkdownEditor";
 import { Button } from "../../components/ui/Button";
-import { useLocation } from "../../contexts/LocationContext";
+import { ALL_LOCATIONS_ID, useLocation } from "../../contexts/LocationContext";
 import { CATEGORY_OPTIONS, PRIORITY_OPTIONS, ROLE_OPTIONS } from "../../lib/memoLabels";
 import type { MemoCategory, MemoCreatePayload, MemoPriority } from "../../types/memo";
 
@@ -78,7 +78,10 @@ export function MemoForm() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!locationId) return;
+    if (!locationId || locationId === ALL_LOCATIONS_ID) {
+      setError("Select a specific location (not “All locations”) before saving a memo.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     const payload: MemoCreatePayload = {

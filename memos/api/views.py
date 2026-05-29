@@ -73,8 +73,28 @@ class MemoViewSet(LocationScopedMixin, viewsets.ModelViewSet):
         context["location"] = self.location
         return context
 
-    def get_queryset(self):
+    def _role_slug_for_scope(self):
+        user = self.request.user
+        if self.user_location_role:
+            return self.user_location_role.role.slug
+        if self.location:
+            role = user.get_role_at(self.location)
+            return role.slug if role else None
+        if self.all_locations and user_is_org_owner(
+            user, getattr(user, "organisation", None)
+        ):
+            return "owner"
+        return None
+
+    def _apply_feed_visibility(self, queryset):
+        """Staff feed: hide memos outside their visible window."""
         now = timezone.now()
+        return queryset.filter(
+            Q(visible_from__isnull=True) | Q(visible_from__lte=now),
+            Q(visible_until__isnull=True) | Q(visible_until__gte=now),
+        )
+
+    def get_queryset(self):
         user = self.request.user
         user_ack = MemoAcknowledgement.objects.filter(
             memo=OuterRef("pk"), user=user
@@ -84,10 +104,6 @@ class MemoViewSet(LocationScopedMixin, viewsets.ModelViewSet):
             super()
             .get_queryset()
             .filter(deleted_at__isnull=True)
-            .filter(
-                Q(visible_from__isnull=True) | Q(visible_from__lte=now),
-                Q(visible_until__isnull=True) | Q(visible_until__gte=now),
-            )
             .select_related("author", "location", "organisation")
             .annotate(
                 acknowledgement_count=Count("acknowledgements", distinct=True),
@@ -97,15 +113,18 @@ class MemoViewSet(LocationScopedMixin, viewsets.ModelViewSet):
             .order_by("-is_pinned", "-created_at")
         )
 
-        role = None
-        if self.user_location_role:
-            role = self.user_location_role.role.slug
-        elif self.location:
-            role = user.get_role_at(self.location)
-            role = role.slug if role else None
-        qs = filter_memos_for_user_role(qs, role)
+        role = self._role_slug_for_scope()
 
-        qs = self._apply_list_filters(qs)
+        # List/unread: scheduled + role targeting apply to everyone (CM/owner exempt in filter).
+        if self.action in ("list", "unread_count"):
+            qs = self._apply_feed_visibility(qs)
+            qs = filter_memos_for_user_role(qs, role)
+            qs = self._apply_list_filters(qs)
+        elif role == "staff":
+            # Staff detail/actions: same rules as the feed.
+            qs = self._apply_feed_visibility(qs)
+            qs = filter_memos_for_user_role(qs, role)
+
         return qs
 
     def _apply_list_filters(self, queryset):
