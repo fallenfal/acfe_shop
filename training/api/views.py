@@ -243,11 +243,12 @@ class OrgTrainingProgrammeViewSet(
         return Response(serializer.data)
 
     @action(detail=True, methods=["post"], url_path="publish")
+    @transaction.atomic
     def publish(self, request, id=None):
         programme = self.get_object()
         if programme.status != TrainingProgramme.Status.DRAFT:
             raise ValidationError("Only draft programmes can be published.")
-        if programme.step_count < 1:
+        if not programme.steps.exists():
             raise ValidationError("Programme must have at least one step to publish.")
         programme.publish()
         memo_count = create_training_publish_memos(programme, request.user)
@@ -258,6 +259,7 @@ class OrgTrainingProgrammeViewSet(
             programme=programme,
             details={"title": programme.title, "memos_created": memo_count},
         )
+        programme = self.get_queryset().get(pk=programme.pk)
         return Response(
             ProgrammeDetailSerializer(programme, context={"request": request}).data
         )

@@ -115,6 +115,17 @@ def staff_mandatory_compliance(location) -> dict:
     }
 
 
+def _memo_title_for_training_publish(programme_title: str) -> str:
+    """Memo.title is max 300 chars; keep the prefix and truncate the programme name."""
+    prefix = "New training available: "
+    max_title = 300
+    room = max_title - len(prefix)
+    if room < 1:
+        return prefix[:max_title]
+    name = programme_title if len(programme_title) <= room else programme_title[: room - 1] + "…"
+    return f"{prefix}{name}"
+
+
 def create_training_publish_memos(programme: TrainingProgramme, author) -> int:
     """Create a location memo when a programme is published. Returns memo count."""
     locations = list(programme.locations.all())
@@ -133,17 +144,19 @@ def create_training_publish_memos(programme: TrainingProgramme, author) -> int:
         else Memo.Priority.NORMAL
     )
     body = f"A new training programme has been published: {programme.title}."
-    if programme.description.strip():
-        body += f" {programme.description.strip()}"
+    description = (programme.description or "").strip()
+    if description:
+        body += f" {description}"
     body += " Go to Training to get started."
 
+    memo_title = _memo_title_for_training_publish(programme.title)
     created = 0
     for location in locations:
         Memo.objects.create(
             organisation=programme.organisation,
             location=location,
             author=author,
-            title=f"New training available: {programme.title}",
+            title=memo_title,
             body=body,
             priority=priority,
             category=Memo.Category.GENERAL,

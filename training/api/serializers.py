@@ -13,9 +13,14 @@ from training.models import (
 def build_media_url(request, field):
     if not field:
         return None
-    if request is not None:
-        return request.build_absolute_uri(field.url)
-    return field.url
+    relative = field.url
+    if request is None:
+        return relative
+    try:
+        return request.build_absolute_uri(relative)
+    except Exception:
+        # Avoid 500 if Host header / ALLOWED_HOSTS rejects build_absolute_uri
+        return relative
 
 
 class UserEnrolmentSummarySerializer(serializers.Serializer):
