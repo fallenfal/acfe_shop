@@ -57,13 +57,19 @@ async function refreshAccessTokenOnce(): Promise<string> {
   return refreshPromise;
 }
 
+function isFormDataBody(body: RequestInit["body"]): boolean {
+  return typeof FormData !== "undefined" && body instanceof FormData;
+}
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
   retryOnUnauthorized = true,
 ): Promise<T> {
   const headers = new Headers(options.headers);
-  if (!headers.has("Content-Type") && options.body) {
+  // FormData must not get Content-Type: application/json — the browser sets
+  // multipart boundary. Forcing JSON breaks waste, date-check photos, etc.
+  if (!headers.has("Content-Type") && options.body && !isFormDataBody(options.body)) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -87,14 +93,33 @@ export async function apiRequest<T>(
     return undefined as T;
   }
 
-  const data = await res.json().catch(() => null);
+  const text = await res.text();
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = null;
+    }
+  }
 
   if (!res.ok) {
     const detail =
       typeof data === "object" && data && "detail" in data
         ? String((data as { detail: unknown }).detail)
-        : res.statusText;
+        : text?.slice(0, 200) || res.statusText;
     throw new ApiError(detail, res.status, data);
+  }
+
+  if (!text) {
+    return undefined as T;
+  }
+  if (data === null) {
+    throw new ApiError(
+      "Server returned a non-JSON response. Check deploy logs (docker compose logs web).",
+      res.status,
+      text,
+    );
   }
 
   return data as T;
