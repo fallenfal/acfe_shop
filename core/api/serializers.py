@@ -78,13 +78,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return obj.get_full_name() or obj.username
 
     def get_avatar_url(self, obj):
-        if not obj.avatar:
-            return None
-        request = self.context.get("request")
-        url = obj.avatar.url
-        if request is not None:
-            return request.build_absolute_uri(url)
-        return url
+        from core.media_urls import absolute_media_url
+
+        return absolute_media_url(obj.avatar)
 
     def get_organisation(self, obj):
         if obj.organisation_id is None:

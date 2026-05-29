@@ -259,14 +259,12 @@ class OrgTrainingProgrammeViewSet(
             programme=programme,
             details={"title": programme.title, "memos_created": memo_count},
         )
-        programme = (
-            TrainingProgramme.objects.filter(pk=programme.pk, organisation=programme.organisation)
-            .prefetch_related("steps", "locations")
-            .annotate(steps_total=Count("steps", distinct=True))
-            .get()
-        )
         return Response(
-            ProgrammeDetailSerializer(programme, context={"request": request}).data
+            {
+                "id": str(programme.id),
+                "status": programme.status,
+                "published_at": programme.published_at,
+            }
         )
 
     @action(detail=True, methods=["post"], url_path="archive")
@@ -282,7 +280,7 @@ class OrgTrainingProgrammeViewSet(
             programme=programme,
             details={"title": programme.title},
         )
-        return Response(ProgrammeDetailSerializer(programme, context={"request": request}).data)
+        return Response({"id": str(programme.id), "status": programme.status})
 
 
 class OrgTrainingHistoryView(APIView):

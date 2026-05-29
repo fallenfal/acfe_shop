@@ -48,6 +48,13 @@ if RAILWAY_PUBLIC_DOMAIN:
         ]
     )
 
+# Absolute origin for uploaded file URLs in API responses (production VPS).
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
+if not PUBLIC_BASE_URL and CSRF_TRUSTED_ORIGINS:
+    PUBLIC_BASE_URL = CSRF_TRUSTED_ORIGINS[0].rstrip("/")
+elif not PUBLIC_BASE_URL and RAILWAY_PUBLIC_DOMAIN:
+    PUBLIC_BASE_URL = f"https://{RAILWAY_PUBLIC_DOMAIN}"
+
 FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
 
 INSTALLED_APPS = [

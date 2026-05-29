@@ -1,6 +1,7 @@
 from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F
 from rest_framework import serializers
 
+from core.media_urls import absolute_media_url
 from training.models import (
     StepCompletion,
     TrainingComment,
@@ -11,16 +12,16 @@ from training.models import (
 
 
 def build_media_url(request, field):
-    if not field:
-        return None
-    relative = field.url
+    """Prefer PUBLIC_BASE_URL; fall back to request host for local dev."""
+    url = absolute_media_url(field)
+    if url or field is None:
+        return url
     if request is None:
-        return relative
+        return None
     try:
-        return request.build_absolute_uri(relative)
+        return request.build_absolute_uri(field.url)
     except Exception:
-        # Avoid 500 if Host header / ALLOWED_HOSTS rejects build_absolute_uri
-        return relative
+        return field.url
 
 
 def programme_step_count(obj) -> int:
@@ -171,7 +172,10 @@ class ProgrammeDetailSerializer(serializers.ModelSerializer):
         )
         avg_minutes = None
         if avg_duration is not None:
-            avg_minutes = round(avg_duration.total_seconds() / 60, 1)
+            try:
+                avg_minutes = round(avg_duration.total_seconds() / 60, 1)
+            except (AttributeError, TypeError):
+                avg_minutes = None
         return ProgrammeStatsSerializer(
             {
                 "total_enrolments": enrolments.count(),
