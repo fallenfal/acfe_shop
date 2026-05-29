@@ -23,6 +23,14 @@ def build_media_url(request, field):
         return relative
 
 
+def programme_step_count(obj) -> int:
+    """Use queryset annotation when present; avoid annotating as step_count (model property)."""
+    total = getattr(obj, "steps_total", None)
+    if total is not None:
+        return int(total)
+    return obj.steps.count()
+
+
 class UserEnrolmentSummarySerializer(serializers.Serializer):
     status = serializers.CharField()
     progress_percentage = serializers.IntegerField()
@@ -30,7 +38,7 @@ class UserEnrolmentSummarySerializer(serializers.Serializer):
 
 
 class ProgrammeListSerializer(serializers.ModelSerializer):
-    step_count = serializers.IntegerField(read_only=True)
+    step_count = serializers.SerializerMethodField()
     enrolment_count = serializers.IntegerField(read_only=True)
     user_enrolment = serializers.SerializerMethodField()
     cover_image = serializers.SerializerMethodField()
@@ -53,6 +61,9 @@ class ProgrammeListSerializer(serializers.ModelSerializer):
 
     def get_cover_image(self, obj):
         return build_media_url(self.context.get("request"), obj.cover_image)
+
+    def get_step_count(self, obj):
+        return programme_step_count(obj)
 
     def get_user_enrolment(self, obj):
         enrolment = self.context.get("user_enrolments", {}).get(str(obj.id))
@@ -101,7 +112,7 @@ class ProgrammeStatsSerializer(serializers.Serializer):
 class ProgrammeDetailSerializer(serializers.ModelSerializer):
     steps = TrainingStepSerializer(many=True, read_only=True)
     stats = serializers.SerializerMethodField()
-    step_count = serializers.IntegerField(read_only=True)
+    step_count = serializers.SerializerMethodField()
     cover_image = serializers.SerializerMethodField()
 
     class Meta:
@@ -140,6 +151,9 @@ class ProgrammeDetailSerializer(serializers.ModelSerializer):
 
     def get_cover_image(self, obj):
         return build_media_url(self.context.get("request"), obj.cover_image)
+
+    def get_step_count(self, obj):
+        return programme_step_count(obj)
 
     def get_stats(self, obj):
         enrolments = TrainingEnrolment.objects.filter(programme=obj)
@@ -354,7 +368,7 @@ class TrainingCommentCreateSerializer(serializers.ModelSerializer):
 
 
 class ProgrammeHistorySerializer(serializers.ModelSerializer):
-    step_count = serializers.IntegerField(read_only=True)
+    step_count = serializers.SerializerMethodField()
     enrolment_count = serializers.IntegerField(read_only=True)
     completed_count = serializers.IntegerField(read_only=True)
     cover_image = serializers.SerializerMethodField()
@@ -379,6 +393,9 @@ class ProgrammeHistorySerializer(serializers.ModelSerializer):
 
     def get_cover_image(self, obj):
         return build_media_url(self.context.get("request"), obj.cover_image)
+
+    def get_step_count(self, obj):
+        return programme_step_count(obj)
 
 
 class ProgrammeOverviewItemSerializer(serializers.Serializer):

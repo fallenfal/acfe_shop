@@ -102,7 +102,7 @@ class LocationTrainingProgrammeViewSet(
             qs = qs.filter(is_mandatory=is_mandatory.lower() in ("true", "1", "yes"))
 
         qs = qs.annotate(
-            step_count=Count("steps", distinct=True),
+            steps_total=Count("steps", distinct=True),
             enrolment_count=Count(
                 "enrolments",
                 filter=Q(enrolments__location=self.location),
@@ -146,32 +146,32 @@ class OrgTrainingProgrammeViewSet(
             return [
                 IsAuthenticated(),
                 IsCmOrAboveInOrg(),
-                OrgPermissionRequired("training.read"),
+                OrgPermissionRequired("training.read")(),
             ]
         if self.action in ("retrieve",):
             return [
                 IsAuthenticated(),
                 IsCmOrAboveInOrg(),
-                OrgPermissionRequired("training.read"),
+                OrgPermissionRequired("training.read")(),
             ]
         if self.action == "destroy":
             return [
                 IsAuthenticated(),
                 IsCmOrAboveInOrg(),
-                OrgPermissionRequired("training.delete"),
+                OrgPermissionRequired("training.delete")(),
             ]
         if self.action in ("publish", "archive"):
             return [
                 IsAuthenticated(),
                 IsCmOrAboveInOrg(),
-                OrgPermissionRequired("training.update"),
+                OrgPermissionRequired("training.update")(),
             ]
         return [
             IsAuthenticated(),
             IsCmOrAboveInOrg(),
             OrgPermissionRequired(
                 "training.create" if self.action == "create" else "training.update"
-            ),
+            )(),
         ]
 
     def get_serializer_class(self):
@@ -189,7 +189,7 @@ class OrgTrainingProgrammeViewSet(
             TrainingProgramme.objects.filter(organisation=org)
             .prefetch_related("steps", "locations")
             .annotate(
-                step_count=Count("steps", distinct=True),
+                steps_total=Count("steps", distinct=True),
                 enrolment_count=Count("enrolments", distinct=True),
             )
         )
@@ -259,7 +259,12 @@ class OrgTrainingProgrammeViewSet(
             programme=programme,
             details={"title": programme.title, "memos_created": memo_count},
         )
-        programme = self.get_queryset().get(pk=programme.pk)
+        programme = (
+            TrainingProgramme.objects.filter(pk=programme.pk, organisation=programme.organisation)
+            .prefetch_related("steps", "locations")
+            .annotate(steps_total=Count("steps", distinct=True))
+            .get()
+        )
         return Response(
             ProgrammeDetailSerializer(programme, context={"request": request}).data
         )
@@ -304,7 +309,7 @@ class OrgTrainingHistoryView(APIView):
                 ],
             )
             .annotate(
-                step_count=Count("steps", distinct=True),
+                steps_total=Count("steps", distinct=True),
                 enrolment_count=Count("enrolments", distinct=True),
                 completed_count=Count(
                     "enrolments",
@@ -348,7 +353,7 @@ class OrgTrainingStepViewSet(
         return [
             IsAuthenticated(),
             IsCmOrAboveInOrg(),
-            OrgPermissionRequired(perm),
+            OrgPermissionRequired(perm)(),
         ]
 
     def get_programme(self):
@@ -432,7 +437,7 @@ class OrgTrainingCommentViewSet(
     def get_permissions(self):
         return [
             IsAuthenticated(),
-            OrgPermissionRequired("training.read"),
+            OrgPermissionRequired("training.read")(),
         ]
 
     def get_programme(self):

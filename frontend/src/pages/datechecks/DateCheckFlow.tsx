@@ -9,6 +9,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { ApiError } from "../../api/client";
 import { fetchMenuItems } from "../../api/menu";
 import { fetchAllStock } from "../../api/inventory";
 import {
@@ -552,8 +553,10 @@ export function DateCheckFlow() {
         alerts: alertCount,
       });
       setStep(4);
-    } catch {
-      setError("Could not complete date check.");
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Could not complete date check.",
+      );
     } finally {
       setLoading(false);
     }

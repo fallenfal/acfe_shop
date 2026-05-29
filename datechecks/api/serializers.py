@@ -83,7 +83,9 @@ class DateCheckEntrySerializer(serializers.ModelSerializer):
 
 class DateCheckDetailSerializer(DateCheckListSerializer):
     notes = serializers.CharField()
-    conducted_by = serializers.UUIDField(source="conducted_by_id", read_only=True)
+    conducted_by = serializers.UUIDField(
+        source="conducted_by_id", read_only=True, allow_null=True
+    )
     entries = DateCheckEntrySerializer(many=True, read_only=True)
 
     class Meta(DateCheckListSerializer.Meta):

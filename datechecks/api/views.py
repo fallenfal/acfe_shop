@@ -49,7 +49,7 @@ class DateCheckViewSet(LocationScopedMixin, viewsets.ModelViewSet):
 
     queryset = DateCheck.objects.all()
     pagination_class = DateCheckPagination
-    http_method_names = ["get", "head", "options", "post", "delete"]
+    http_method_names = ["get", "head", "options", "post", "put", "delete"]
 
     def get_permissions(self):
         permission_map = {
@@ -172,7 +172,17 @@ class DateCheckViewSet(LocationScopedMixin, viewsets.ModelViewSet):
                 "alerts_created": len(alerts),
             },
         )
-        return Response(DateCheckDetailSerializer(date_check).data)
+        date_check = (
+            DateCheck.objects.filter(pk=date_check.pk, location=self.location)
+            .select_related("location", "conducted_by")
+            .prefetch_related("entries__stock_item", "entries__menu_item")
+            .get()
+        )
+        return Response(
+            DateCheckDetailSerializer(
+                date_check, context=self.get_serializer_context()
+            ).data
+        )
 
 
 class DateCheckEntryViewSet(LocationScopedMixin, viewsets.ModelViewSet):
